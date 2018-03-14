@@ -46,35 +46,34 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 //	}
 //	catch(std::exception e) { qFatal("Error reading config params"); }
 
-
-
-
 	timer.start(Period);
-
-
 	return true;
 }
 
 void SpecificWorker::compute()
 {
-	QMutexLocker locker(mutex);
-	//computeCODE
-// 	try
-// 	{
-// 		camera_proxy->getYImage(0,img, cState, bState);
-// 		memcpy(image_gray.data, &img[0], m_width*m_height*sizeof(uchar));
-// 		searchTags(image_gray);
-// 	}
-// 	catch(const Ice::Exception &e)
-// 	{
-// 		std::cout << "Error reading from Camera" << e << std::endl;
-// 	}
+	if(cola.isWaiting())
+	{
+		cola.setWaiting(false);
+		//std::this_thread::sleep_for(1ms);
+		sleep(1);
+		qDebug() << "imagen procesada";
+		//copiar pòse a cola
+		cola.setReady(true);
+	}
 }
 
+////////////////////////////////////////////////////////////////////
+////////////// SERVANT /////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 
 Pose SpecificWorker::processImage(const TImage &img)
 {
-//implementCODE
+	cola.copyImg(img.image);
+	qDebug() << "imagen recibida";
+	// while(!cola.isReady();
+	cola.setReady(false);
+	return cola.getPose();
 
 }
 
