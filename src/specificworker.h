@@ -34,9 +34,14 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
-
 #include <mutex>
 #include <atomic>
+#include <chrono>
+#include <iostream>
+#include <thread>
+#include <future>
+
+#include "openpose.h"
 
 // includes del openpose
 
@@ -57,7 +62,7 @@ class Cola
 		
 	private:
 		cv::Mat img;
-		std::atomic<bool> waiting{true};
+		std::atomic<bool> waiting{false};
 		std::atomic<bool> ready{false};
 		RoboCompOpenposeServer::Pose pose;
 
@@ -83,6 +88,8 @@ public slots:
 private:
 	InnerModel *innerModel;
 	Cola cola;
+	Openpose openpose;
+	std::future<void> futur;
 
 };
 

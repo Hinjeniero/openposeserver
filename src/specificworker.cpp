@@ -23,7 +23,6 @@
 */
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
-
 }
 
 /**
@@ -31,27 +30,18 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 */
 SpecificWorker::~SpecificWorker()
 {
-
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-//       THE FOLLOWING IS JUST AN EXAMPLE
-//
-//	try
-//	{
-//		RoboCompCommonBehavior::Parameter par = params.at("InnerModelPath");
-//		innermodel_path = par.value;
-//		innermodel = new InnerModel(innermodel_path);
-//	}
-//	catch(std::exception e) { qFatal("Error reading config params"); }
-
-	timer.start(Period);
+	futur = std::async(std::launch::async, &Openpose::wrapper, openpose);
+	//timer.start(Period);
 	return true;
 }
 
 void SpecificWorker::compute()
 {
+	qDebug() << "hola";
 	if(cola.isWaiting())
 	{
 		cola.setWaiting(false);
