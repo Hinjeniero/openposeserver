@@ -40,34 +40,10 @@
 #include <iostream>
 #include <thread>
 #include <future>
+#include <ctime>
 
+#include "cola.h"
 #include "openpose.h"
-
-// includes del openpose
-
-class Cola
-{
-	public:
-		void copyImg(const RoboCompOpenposeServer::ImgType &imgIn)	
-				{   std::lock_guard<std::mutex> lock(mutex); 
-					img = (cv::Mat)imgIn;
-					waiting.store(true);
-				};
-		
-		bool isWaiting() const 							{return waiting.load();};
-		void setWaiting(bool v)							{waiting.store(v);};
-		bool isReady()   const 							{return ready.load();};
-		void setReady(bool v) 	 						{ready.store(v);};
-		RoboCompOpenposeServer::Pose getPose() const 	{std::lock_guard<std::mutex> lock(mutex);  return pose;}
-		
-	private:
-		cv::Mat img;
-		std::atomic<bool> waiting{false};
-		std::atomic<bool> ready{false};
-		RoboCompOpenposeServer::Pose pose;
-
-		mutable std::mutex mutex;
-};
 
 
 class SpecificWorker : public GenericWorker
@@ -87,9 +63,10 @@ public slots:
 
 private:
 	InnerModel *innerModel;
-	Cola cola;
+	std::shared_ptr<Cola> cola;
 	Openpose openpose;
 	std::future<void> futur;
+	void FPS();
 
 };
 

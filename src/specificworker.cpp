@@ -34,22 +34,39 @@ SpecificWorker::~SpecificWorker()
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
+	cola = std::make_shared<Cola>();
+	openpose.setCola(cola);
 	futur = std::async(std::launch::async, &Openpose::wrapper, openpose);
-	//timer.start(Period);
+	timer.start(Period);
+	//futur.wait();
 	return true;
 }
 
 void SpecificWorker::compute()
 {
-	qDebug() << "hola";
-	if(cola.isWaiting())
-	{
-		cola.setWaiting(false);
-		//std::this_thread::sleep_for(1ms);
-		sleep(1);
-		qDebug() << "imagen procesada";
-		//copiar pòse a cola
-		cola.setReady(true);
+// 	if(cola->isWaiting())
+// 	{
+// 		cola->setWaiting(false);
+// 		qDebug() << "imagen procesada";
+// 		//copiar pòse a cola
+// 		cola->setReady(true);
+// 		FPS();
+// 	}
+}
+
+void SpecificWorker::FPS()
+{
+	static uint cont = 0;
+	static std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+	
+	std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
+	cont++;
+	//std::cout << "Time " << std::chrono::duration_cast<std::chrono::milliseconds>(end-begin).count() << " " << std::endl;
+	if (std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() > 5)
+	{	
+		std::cout << "FPS " << cont / 5  << std::endl;
+		cont = 0;
+		begin = std::chrono::steady_clock::now();
 	}
 }
 
@@ -57,14 +74,13 @@ void SpecificWorker::compute()
 ////////////// SERVANT /////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
 
-Pose SpecificWorker::processImage(const TImage &img)
+Pose SpecificWorker::processImage(const RoboCompOpenposeServer::TImage &img)
 {
-	cola.copyImg(img.image);
-	qDebug() << "imagen recibida";
-	// while(!cola.isReady();
-	cola.setReady(false);
-	return cola.getPose();
-
+	cola->copyImg(img);
+	while(!cola->isReady());
+	FPS();
+    //const char key = (char)cv::waitKey(10);
+  	return cola->getPose();
 }
 
 
