@@ -16,30 +16,41 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENPOSESERVER_H
-#define OPENPOSESERVER_H
 
-// Ice includes
-#include <Ice/Ice.h>
-#include <OpenposeServer.h>
+/**
+       \brief
+       @author authorname
+*/
 
-#include <config.h>
+#ifndef COLA_H
+#define COLA_H
+
 #include "genericworker.h"
+#include <mutex>
+#include <atomic>
+#include <chrono>
+#include <iostream>
+#include <thread>
+#include <ctime>
+#include <opencv2/core/core.hpp>
 
-using namespace RoboCompOpenposeServer;
-
-class OpenposeServerI : public virtual RoboCompOpenposeServer::OpenposeServer
+class Cola
 {
-public:
-OpenposeServerI(GenericWorker *_worker);
-	~OpenposeServerI();
+	public:
+		Cola();
+		void copyImg(const RoboCompOpenposeServer::TImage &img_);
+		RoboCompOpenposeServer::People getPose();
+		bool isWaiting();
+		bool isReady();
+		cv::Mat& getImage();
+		void movePeople(RoboCompOpenposeServer::People&& people_);
 
-	People processImage(const TImage  &img, const Ice::Current&);
-
-private:
-
-	GenericWorker *worker;
-
+	private:
+		cv::Mat img;
+		RoboCompOpenposeServer::People people;
+		std::atomic<bool> waiting{false};
+		std::atomic<bool> ready{false};
+		mutable std::mutex mutex;
 };
 
 #endif

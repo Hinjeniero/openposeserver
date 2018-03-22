@@ -54,9 +54,7 @@ public:
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;
 
-
-
-	virtual Pose processImage(const TImage &img) = 0;
+	virtual People processImage(const TImage &img) = 0;
 
 protected:
 	QTimer timer;

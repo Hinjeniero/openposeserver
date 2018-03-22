@@ -38,17 +38,18 @@
 #include <chrono> // `std::chrono::` functions and classes, e.g. std::chrono::milliseconds
 #include <thread> // std::this_thread
 #include <iostream>
-// Other 3rdparty dependencies
-// GFlags: DEFINE_bool, _int32, _int64, _uint64, _double, _string
-// OpenPose dependencies
 #include <openpose/headers.hpp>
+// #include <openpose/core/headers.hpp>
+// #include <openpose/pose/headers.hpp>
+// #include <openpose/utilities/headers.hpp>
+// #include <openpose/gui/headers.hpp>
+// #include <openpose/filestream/headers.hpp>
+
 #include "cola.h"
 
 struct UserDatum : public op::Datum
 {
     bool boolThatUserNeedsForSomeReason;
-	
-	
     UserDatum(const bool boolThatUserNeedsForSomeReason_ = false) :
         boolThatUserNeedsForSomeReason{boolThatUserNeedsForSomeReason_}
     {}
@@ -73,21 +74,33 @@ public:
 
     std::shared_ptr<std::vector<UserDatum>> workProducer()
     {
-	  try
-	  {
+	  std::cout << "1 " << std::endl;
+	  try	  {
 		// Create new datum
 		auto datumsPtr = std::make_shared<std::vector<UserDatum>>();
 		datumsPtr->emplace_back();
 		auto& datum = datumsPtr->at(0);
 
+		std::cout << __FUNCTION__ << "2" << std::endl;
 		// Check shared queue 
 		if(cola->isWaiting())
-			datum.cvInputData = cola->getImage();
-		else
 		{
-			std::this_thread::sleep_for(1ms);
-			datumsPtr = nullptr;
+			datum.cvInputData = cola->getImage();
 		}
+		std::cout << "3" << std::endl;
+		// If empty frame -> return nullptr
+ 		if (datum.cvInputData.empty())
+ 		{
+ 			std::cout << " 4 " << __FUNCTION__ << std::endl;
+ 			this->stop();
+ 			datumsPtr = nullptr;
+ 		}
+
+// 	else
+// 		{
+// 			std::this_thread::sleep_for(1ms);
+// 			datumsPtr = nullptr;
+// 		}
 	
 		//if (datum.cvInputData.empty())
 		//	datumsPtr = nullptr;
@@ -212,13 +225,10 @@ private:
 class Openpose
 {
 	public:
-		Openpose(){};
-		void wrapper();
+		void init();
 		void setCola(const std::shared_ptr<Cola> &cola_)		{ cola = cola_;};
 	private:
-	//	UserDatum datum;
-	std::shared_ptr<Cola> cola;
-};
+		std::shared_ptr<Cola> cola;
 
 #endif // OPENPOSE_H
 

@@ -55,7 +55,7 @@ public:
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 
-	Pose processImage(const TImage &img);
+	People processImage(const TImage &img);
 	
 
 public slots:

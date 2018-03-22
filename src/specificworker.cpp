@@ -36,7 +36,8 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
 	cola = std::make_shared<Cola>();
 	openpose.setCola(cola);
-	futur = std::async(std::launch::async, &Openpose::wrapper, openpose);
+	
+	//futur = std::async(std::launch::async, &Openpose::wrapper, openpose);
 	timer.start(Period);
 	//futur.wait();
 	return true;
@@ -52,6 +53,8 @@ void SpecificWorker::compute()
 // 		cola->setReady(true);
 // 		FPS();
 // 	}
+	
+	cv::imshow("dd", openpose.wrapper());
 }
 
 void SpecificWorker::FPS()
@@ -74,7 +77,7 @@ void SpecificWorker::FPS()
 ////////////// SERVANT /////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
 
-Pose SpecificWorker::processImage(const RoboCompOpenposeServer::TImage &img)
+People SpecificWorker::processImage(const RoboCompOpenposeServer::TImage &img)
 {
 	cola->copyImg(img);
 	while(!cola->isReady());

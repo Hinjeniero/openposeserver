@@ -28,7 +28,7 @@ OpenposeServerI::~OpenposeServerI()
 {
 }
 
-Pose OpenposeServerI::processImage(const TImage  &img, const Ice::Current&)
+People OpenposeServerI::processImage(const TImage  &img, const Ice::Current&)
 {
 	return worker->processImage(img);
 }

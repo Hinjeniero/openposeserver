@@ -14,14 +14,6 @@ ENDIF(NOT EXISTS $ENV{ROBOCOMP}/cmake)
 INCLUDE( $ENV{ROBOCOMP}/cmake/robocomp.cmake )
 INCLUDE ( CMakeListsSpecific.txt)
 
-#INCLUDE( $ENV{ROBOCOMP}/cmake/modules/opencv3.cmake )
-find_package(OpenCV 2 REQUIRED)
-INCLUDE_DIRECTORIES( ${OpenCV_INCLUDE_DIR} )
-SET(LIBS ${LIBS} ${OpenCV_LIBS})
-MESSAGE(STATUS ${OpenCV_LIBS})
-
-
-
 # Sources set
 SET ( SOURCES
   ${SOURCES}
@@ -36,6 +28,7 @@ SET ( SOURCES
   specificworker.cpp
   openposeserverI.cpp
 )
+
 
 
 #ROBOCOMP
