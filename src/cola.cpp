@@ -24,13 +24,12 @@ RoboCompOpenposeServer::People Cola::getPose()
 	return people;
 }
 
-bool Cola::isWaiting()
+bool Cola::isWaiting() const 
 {
-	//std::cout << __FUNCTION__ << std::endl;
 	return waiting.load();
 }
 
-bool Cola::isReady()
+bool Cola::isReady() const 
 {
 	return ready.load();
 }
@@ -41,8 +40,8 @@ cv::Mat& Cola::getImage()
 	return std::ref(img);
 }
 
-void Cola::movePeople(RoboCompOpenposeServer::People&& people)
+void Cola::movePeople(RoboCompOpenposeServer::People&& people_)
 {
-	people = std::move(people);
+	people = std::move(people_);
 	ready.store(true);
 }

@@ -40,8 +40,8 @@ class Cola
 		Cola();
 		void copyImg(const RoboCompOpenposeServer::TImage &img_);
 		RoboCompOpenposeServer::People getPose();
-		bool isWaiting();
-		bool isReady();
+		bool isWaiting() const ;
+		bool isReady() const;
 		cv::Mat& getImage();
 		void movePeople(RoboCompOpenposeServer::People&& people_);
 

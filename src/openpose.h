@@ -38,21 +38,23 @@
 #include <chrono> // `std::chrono::` functions and classes, e.g. std::chrono::milliseconds
 #include <thread> // std::this_thread
 #include <iostream>
+#include <gflags/gflags.h>
 #include <openpose/headers.hpp>
-// #include <openpose/core/headers.hpp>
-// #include <openpose/pose/headers.hpp>
-// #include <openpose/utilities/headers.hpp>
-// #include <openpose/gui/headers.hpp>
-// #include <openpose/filestream/headers.hpp>
+#include <openpose/core/headers.hpp>
+#include <openpose/pose/headers.hpp>
+#include <openpose/utilities/headers.hpp>
+#include <openpose/gui/headers.hpp>
+#include <openpose/filestream/headers.hpp>
 
 #include "cola.h"
+
 
 struct UserDatum : public op::Datum
 {
     bool boolThatUserNeedsForSomeReason;
     UserDatum(const bool boolThatUserNeedsForSomeReason_ = false) :
         boolThatUserNeedsForSomeReason{boolThatUserNeedsForSomeReason_}
-    {}
+    {};
 };
 
 // The W-classes can be implemented either as a template or as simple classes given
@@ -74,33 +76,26 @@ public:
 
     std::shared_ptr<std::vector<UserDatum>> workProducer()
     {
-	  std::cout << "1 " << std::endl;
-	  try	  {
-		// Create new datum
+	  //std::cout << __FUNCTION__ << " 1 " << std::endl;
+	  try	  
+	  {
 		auto datumsPtr = std::make_shared<std::vector<UserDatum>>();
 		datumsPtr->emplace_back();
 		auto& datum = datumsPtr->at(0);
-
-		std::cout << __FUNCTION__ << "2" << std::endl;
+		
 		// Check shared queue 
 		if(cola->isWaiting())
 		{
 			datum.cvInputData = cola->getImage();
+			
+			if (datum.cvInputData.empty())
+				datumsPtr = nullptr;
 		}
-		std::cout << "3" << std::endl;
-		// If empty frame -> return nullptr
- 		if (datum.cvInputData.empty())
+		else
  		{
- 			std::cout << " 4 " << __FUNCTION__ << std::endl;
- 			this->stop();
+ 			std::this_thread::sleep_for(1ms);
  			datumsPtr = nullptr;
  		}
-
-// 	else
-// 		{
-// 			std::this_thread::sleep_for(1ms);
-// 			datumsPtr = nullptr;
-// 		}
 	
 		//if (datum.cvInputData.empty())
 		//	datumsPtr = nullptr;
@@ -124,7 +119,6 @@ public:
 	std::shared_ptr<Cola> cola;
 };
 
-// This worker will just invert the image
 class WUserPostProcessing : public op::Worker<std::shared_ptr<std::vector<UserDatum>>>
 {
 public:
@@ -137,19 +131,7 @@ public:
 
     void work(std::shared_ptr<std::vector<UserDatum>>& datumsPtr)
     {
-        // User's post-processing (after OpenPose processing & before OpenPose outputs) here
-            // datum.cvOutputData: rendered frame with pose or heatmaps
-            // datum.poseKeypoints: Array<float> with the estimated pose
-        try
-        {
-			std::this_thread::sleep_for(1ms);
-        }
-        catch (const std::exception& e)
-        {
-            op::log("Some kind of unexpected error happened.");
-            this->stop();
-            op::error(e.what(), __LINE__, __FUNCTION__, __FILE__);
-        }
+     	std::this_thread::sleep_for(1ms);
     }
 };
 
@@ -169,26 +151,9 @@ public:
         {
              if (datumsPtr != nullptr && !datumsPtr->empty())
              {
-//                 // Show in command line the resulting pose keypoints for body, face and hands
-//                 op::log("\nKeypoints:");
-//                 // Accesing each element of the keypoints
-//                 const auto& poseKeypoints = datumsPtr->at(0).poseKeypoints;
-//                 op::log("Person pose keypoints:");
-//                 for (auto person = 0 ; person < poseKeypoints.getSize(0) ; person++)
-//                 {
-//                     op::log("Person " + std::to_string(person) + " (x, y, score):");
-//                     for (auto bodyPart = 0 ; bodyPart < poseKeypoints.getSize(1) ; bodyPart++)
-//                     {
-//                         std::string valueToPrint;
-//                         for (auto xyscore = 0 ; xyscore < poseKeypoints.getSize(2) ; xyscore++)
-//                         {
-//                             valueToPrint += std::to_string(   poseKeypoints[{person, bodyPart, xyscore}]   ) + " ";
-//                         }
-//                         op::log(valueToPrint);
-//                     }
-//                 }
-				
+				 
 				const auto& poseKeypoints = datumsPtr->at(0).poseKeypoints;
+				//std::cout << __FUNCTION__ << "keypoints " << poseKeypoints.getSize(1) <<  std::endl;
 				RoboCompOpenposeServer::People people;  
 			
 				const std::string part_names[]{"nose","neck","lsh","lelbow","lwrist","rsh","relbow","rwrist","lhip","lknee","lfoot","rhip","rknee",
@@ -197,7 +162,6 @@ public:
                 for (auto pers = 0 ; pers < poseKeypoints.getSize(0) ; pers++)
                 {
 					RoboCompOpenposeServer::Person person;  
-					//RoboCompOpenposeServer::TBody body;  
 					for (auto bodyPart = 0 ; bodyPart < poseKeypoints.getSize(1) ; bodyPart++)
                     {
 						RoboCompOpenposeServer::KeyPoint kp{(int)poseKeypoints[{pers, bodyPart, 0}], (int)poseKeypoints[{pers, bodyPart, 1}], poseKeypoints[{pers, bodyPart, 2}]};
@@ -229,7 +193,7 @@ class Openpose
 		void setCola(const std::shared_ptr<Cola> &cola_)		{ cola = cola_;};
 	private:
 		std::shared_ptr<Cola> cola;
-
+};
 #endif // OPENPOSE_H
 
 
